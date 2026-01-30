@@ -1,1 +1,3 @@
-<img src="assets/watermark.png">
+<p align="center">
+    <img src="assets/watermark.png">
+<p/>
