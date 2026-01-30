@@ -1,1 +1,1 @@
-# procasti-os
+<img src="assets/watermark.png">
