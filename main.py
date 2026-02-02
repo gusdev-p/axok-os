@@ -30,7 +30,7 @@ import hashlib
 # GLOBAL VARIABLES AND CONFIGS
 # ==============================
 # TODO: edit paths to global paths to compile
-config_file : str = "/workspaces/axok-os/etc/aopi.d/settings.cfg"
+config_file : str = "/home/gustavo/nada-naum/AOPI/etc/aopi.d/settings.cfg"
 date = datetime.date.today()
 
 # NOTE: this is the default values from file.
@@ -38,16 +38,16 @@ date = datetime.date.today()
 logs = True
 verbose = True
 exit_in_error = True
-logs_path = "/workspaces/axok-os/var/aopi/logs"
+logs_path = "/home/gustavo/nada-naum/aopi/var"
 repo_link = ""
 test_link = ""
 # TODO: edit this for a global path
-aopi_public_key = "/workspaces/axok-os/etc/aopi.d/key.asc"
-original_key = "/workspaces/axok-os/etc/aopi.d/key.asc"
+aopi_public_key = "/home/gustavo/nada-naum/aopi/etc/AOPI.d/key.asc"
+original_key = "/home/gustavo/nada-naum/aopi/etc/AOPI.d/key.asc"
 temp_dir = "/tmp"
 expected_fp = ""
 installed_packages = ""
-modules = ""
+installed_modules = ""
 
 # open config file
 config = ConfigParser()
@@ -64,7 +64,7 @@ aopi_public_key = config["AOPI"]["aopi_public_key"]
 temp_dir = config["Paths"]["temp_dir"]
 expected_fp = config["AOPI"]["expected_fp"]
 installed_packages = config["Paths"]["installed_packages"]
-modules = config["Paths"]["installed_modules"]
+installed_modules = config["Paths"]["installed_modules"]
 
 # ========================
 # PRINT DEFS
@@ -107,7 +107,7 @@ def usage():
 aopi [OPERATION(install, remove, update, help, version)] [PACKAGE(s)]
 for more info use 'aopi help me'
 """)
-    sys.exit(6)
+    sys.exit(7)
     
 def about():
     print("""\033[35m
@@ -123,44 +123,49 @@ Made by: gusdev
 def help():
     print("""AOPI help.
 Usage:
-    aopi [OPERATION(install, remote, update)] [PACKAGE(s)]
-Exit codes:
+    aopi [OPERATION] [PACKAGE]
+Exit Codes:
     user:
-        1: user aborted
-        2: bad answer ( too much or too few arguments )
-        3: invalid answer
+        1: User aborted
+        2: Bad answer (too much or too few arguments)
+        3: Invalid answer
+        4: Bad usage (invalid parameters)
     AOPI:
-        4: user is not root
+        5: User is not root
+        6: Help Opened
+        7: Usage opened
     installing:
-        5: Timeout while downloading
-        6: Network error while downloading
-        7: Unknown HTTP error
+        8: Timeout while downloading
+        10: Network error while downloading
+        11: Unknown HTTP error
         extracting:
-            8: Invalid or corrupted archive
-            9: Unsupported or broken compression format
-            10: Unknown tar error while extracting
+            12: Invalid or corrupted archive
+            13: Unsupported or broken compression format
+            14: Unknown tar error while extracting
         Checking GPG Key:
-            11: The specified key does not exist
-            12: The keys dont match
+            15: The specified key does not exist
+            16: The keys dont match
         Checking SHA256:
-            13: The SHA256 dont match
-            14: The specified archive does not exist
+            17: The SHA256 dont match
+            18: The specified archive does not exist
         Opening Manifest:
-            15: Dont have a essential section
-            16: Dont exist a manifest
-            17: The manifest is corrupteds
+            19: Dont have a essential section
+            20: Dont exist a manifest
+            21: The manifest is corrupteds
     Removing:
-        18: The package script directory is a file
-        19: The package script directory dont exist
-        20: Cant delete the package script directory
+        22: The package script directory is a file
+        23: The package script directory dont exist
+        24: Cant delete the package script directory
     Updating:
-        21: The package script directory is a file
-        22: The package script directory dont exist
-        23: Cant delete the package script directory
+        25: The package script directory is a file
+        26: The package script directory dont exist
+        27: Cant delete the package script directory
     List:
-        24: Invalid answer ( the specified list dont exist )
-        25: The 'installed packages' directory is not a directory
+        28: Invalid answer ( the specified list dont exist )
+        29: The 'installed packages' directory is not a directory
+        30: The 'installed modules' directory is not a directory
 """)
+    sys.exit(5)
 
 # ======================
 # EXTRA AND CHECKS DEFS
@@ -203,7 +208,9 @@ argc = len(sys.argv)
 # ======================
 # CHECK ARGUMNETS
 # ======================
-if argc < 3:
+if argc < 2:
+    usage()
+elif argc < 3:
     match sys.argv[1]:
         case "help":
             help()
@@ -230,8 +237,8 @@ match operation:
             info(f"Cache created in '{cache}'.")
             info("Creating essential directories...")
             essential_dirs = [
-                f"{cache}/source"
-                f"{cache}/key"
+                f"{cache}/source",
+                f"{cache}/key",
                 f"{cache}/extracted"
             ]
             for dir in essential_dirs:
@@ -405,7 +412,7 @@ match operation:
                 error("Tha package script directory is a file :(", 21)
             else:
                 error("The package script direcotry dont exist :(", 22)
-        sub.run(["sh", f"{package_root}/remove.sh"])
+        sub.run(["sh", f"{package_root}/update.sh"])
         info("Done!")
         info("Removing package from 'installed packages'...")
         try:
@@ -417,11 +424,11 @@ match operation:
     case "list":
         match package_to_operate:
             case "packages":
-                info("Getting all installed packages...")
+                info("Getting all 'installed packages'...")
                 if p(installed_packages).is_dir():
                     pass
                 else:
-                    error("The 'installed packages' is not a directory", 25)
+                    error("The 'installed packages' is not a director :(", 25)
                 packages_installed = []
                 for package in p(installed_packages).iterdir():
                     if package.is_dir():
@@ -438,6 +445,36 @@ match operation:
                 info("Looks like everything is done!")
                 sys.exit(0)
             case "modules":
-                pass
+                info("Getting all 'installed modules'...")
+                if p(installed_modules).is_dir():
+                    pass
+                else:
+                    error("The 'installed_modules' is not a directory :(", 26)
+                modules_installed = []
+                for module in p(installed_modules).iterdir():
+                    if module.is_dir():
+                        modules_installed.append(module)
+                    else:
+                        warn(f"The '{module}' is not a directory")
+                print("-" * 30)
+                print("[::] Modules found:")
+                for i, module in enumerate(modules_installed):
+                    prefix = "├───" if i < len(modules_installed) -1 else "╰───"
+                    print(prefix + module.name)
+                print("-" * 30)
+                info("Looks like everything is done!")
+                sys.exit(0)
             case _:
-                pass
+                error("The specified list dont exist :(", 24)
+    case "help":
+        if package_to_operate == "me":
+            help()
+        else:
+            error(f"Invalid parameter '{package_to_operate}' to help :(\nUse 'aopi help me' to get help.", 4)
+    case "version":
+        if argc == 2:
+            about()
+            sys.exit(0)
+        error("Bad usage :(\nUse 'aopi help me' for help.", 4)
+    case _:
+        usage()
