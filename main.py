@@ -1,9 +1,9 @@
 """
 
-POPI
-      P         O  P       I
-      |         |  |       |
-    ( Procasti!_OS Package Installer )
+AOPI
+      A     O  P       I
+      |     |  |       |
+    ( Axok!_OS Package Installer )
 
 made by: gusdev
 version: v1
@@ -30,7 +30,7 @@ import hashlib
 # GLOBAL VARIABLES AND CONFIGS
 # ==============================
 # TODO: edit paths to global paths to compile
-config_file : str = "/home/gustavo/nada-naum/popi/etc/popi.d/settings.cfg"
+config_file : str = "/workspaces/axok-os/etc/aopi.d/settings.cfg"
 date = datetime.date.today()
 
 # NOTE: this is the default values from file.
@@ -38,12 +38,12 @@ date = datetime.date.today()
 logs = True
 verbose = True
 exit_in_error = True
-logs_path = "/home/gustavo/nada-naum/popi/var"
+logs_path = "/workspaces/axok-os/var/aopi/logs"
 repo_link = ""
 test_link = ""
 # TODO: edit this for a global path
-popi_public_key = "/home/gustavo/nada-naum/popi/etc/popi.d/key.asc"
-original_key = "/home/gustavo/nada-naum/popi/etc/popi.d/key.asc"
+aopi_public_key = "/workspaces/axok-os/etc/aopi.d/key.asc"
+original_key = "/workspaces/axok-os/etc/aopi.d/key.asc"
 temp_dir = "/tmp"
 expected_fp = ""
 installed_packages = ""
@@ -60,11 +60,11 @@ exit_in_error = config["Behavior"].getboolean("exit_in_error")
 logs_path = config["Paths"]["logs_path"]
 repo_link = config["Repository"]["main"]
 test_link = config["Repository"]["test"]
-popi_public_key = config["POPI"]["popi_public_key"]
+aopi_public_key = config["AOPI"]["aopi_public_key"]
 temp_dir = config["Paths"]["temp_dir"]
-expected_fp = config["POPI"]["expected_fp"]
+expected_fp = config["AOPI"]["expected_fp"]
 installed_packages = config["Paths"]["installed_packages"]
-modules = config["Paths"]["modules"]
+modules = config["Paths"]["installed_modules"]
 
 # ========================
 # PRINT DEFS
@@ -103,33 +103,33 @@ def error(msg: str, exit: int):
         sys.exit(exit)
 
 def usage():
-    print("""POPI Usage:
-popi [OPERATION(install, remove, update, help, version)] [PACKAGE(s)]
-for more info use 'popi help me'
+    print("""AOPI Usage:
+aopi [OPERATION(install, remove, update, help, version)] [PACKAGE(s)]
+for more info use 'aopi help me'
 """)
     sys.exit(6)
     
 def about():
     print("""\033[35m
-POPI\033[33m
-      P         O  P       I
-      |         |  |       |
-    ( Procasti!_OS Package Installer )\033[]0m
+AOPI\033[33m
+      A     O  P       I
+      |     |  |       |
+    ( Axok!_OS Package Installer )\033[]0m
 Version: v1
 Made by: gusdev
 """)
 
 # TODO: make a better exit codes system before compile
 def help():
-    print("""POPI help.
+    print("""AOPI help.
 Usage:
-    popi [OPERATION(install, remote, update)] [PACKAGE(s)]
+    aopi [OPERATION(install, remote, update)] [PACKAGE(s)]
 Exit codes:
     user:
         1: user aborted
         2: bad answer ( too much or too few arguments )
         3: invalid answer
-    POPI:
+    AOPI:
         4: user is not root
     installing:
         5: Timeout while downloading
@@ -195,7 +195,7 @@ def check_sha(path: str, sha_to_check: str):
 if os.geteuid() == 0:
     pass
 else:
-    error("To execute POPI you must be root!", 4)
+    error("To execute AOPI you must be root!", 4)
 
 # define argc
 argc = len(sys.argv)
@@ -275,7 +275,7 @@ match operation:
             info("Creating GPG checker cache...")
             gpg = gnupg.GPG(gnupghome=tempfile.mkdtemp())
             try:
-                with open(popi_public_key, "r") as f:
+                with open(aopi_public_key, "r") as f:
                     key_data = f.read()
             except FileNotFoundError:
                 error("The specified key does not exist :(", 11)
@@ -323,7 +323,7 @@ match operation:
             info("Done!")
             print(f"""{"-" * 30}
 [::] Package detected!
-{"[⚠] Third-party GPG key detected.\nInstalling it requires root, and you proceed at your own risk." if original_key != popi_public_key else "[✓] GPG Verified."}
+{"[⚠] Third-party GPG key detected.\nInstalling it requires root, and you proceed at your own risk." if original_key != aopi_public_key else "[✓] GPG Verified."}
 
 {manifest_content["name"]}
 ├───Description: {manifest_content["description"]}
