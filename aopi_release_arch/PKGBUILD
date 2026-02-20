@@ -1,0 +1,15 @@
+pkgname=aopi
+pkgver=1.0
+pkgrel=1
+arch=('x86_64')
+license=('custom')
+depends=('python3' 'python-requests' 'python-tqdm' 'python-gnupg')
+source=()
+sha256sums=()
+
+package() {
+    install -Dm755 "$srcdir/main.py" "$pkgdir/usr/share/aopi/main.py"
+    install -Dm755 "$srcdir/aopi" "$pkgdir/usr/bin/aopi"
+    install -Dm644 "$srcdir/etc/aopi.d/key.asc" "$pkgdir/etc/aopi.d/key.asc"
+    install -Dm644 "$srcdir/etc/aopi.d/settings.cfg" "$pkgdir/etc/aopi.d/settings.cfg"
+}
